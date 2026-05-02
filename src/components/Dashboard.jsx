@@ -10,6 +10,8 @@ function Dashboard({
   handlePercentage,
   handleScientificOp,
   handleParenthesis,
+  showScientific,
+  setShowScientific,
 }) {
   const buttons = [
     {
@@ -123,12 +125,31 @@ function Dashboard({
   const formatDisplay = (value) => {
     if (value === "" || value === "Error") return value;
 
+    // Check if it's a simple number (no operators)
     const match = value.match(/^(-?)(\d+)(\.\d*)?$/);
-    if (!match) return value;
+    if (match) {
+      const [, sign, integerPart, decimalPart = ""] = match;
+      const groupedInteger = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+      return `${sign}${groupedInteger}${decimalPart}`;
+    }
 
-    const [, sign, integerPart, decimalPart = ""] = match;
-    const groupedInteger = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-    return `${sign}${groupedInteger}${decimalPart}`;
+    // If it contains operators, format each number separately
+    if (/[+\-×÷]/.test(value)) {
+      return value.replace(/\d+\.?\d*/g, (num) => {
+        const parts = num.match(/^(-?)(\d+)(\.\d*)?$/);
+        if (parts) {
+          const [, sign, integerPart, decimalPart = ""] = parts;
+          const groupedInteger = integerPart.replace(
+            /\B(?=(\d{3})+(?!\d))/g,
+            ",",
+          );
+          return `${sign}${groupedInteger}${decimalPart}`;
+        }
+        return num;
+      });
+    }
+
+    return value;
   };
 
   return (
@@ -143,18 +164,30 @@ function Dashboard({
             </p>
           </div>
 
-          {/* Scientific Functions */}
-          <div className="grid grid-cols-3 md:grid-cols-6 gap-2 mb-6 bg-amber-800 p-4 rounded-lg border border-yellow-600">
-            {scientificButtons.map((btn) => (
-              <button
-                key={btn.label}
-                onClick={btn.onClick}
-                className="w-full bg-linear-to-b from-yellow-500 to-yellow-600 hover:from-yellow-400 hover:to-yellow-500 text-amber-900 font-bold py-2 px-3 rounded transition-all transform hover:scale-105 shadow-md text-sm"
-              >
-                {btn.label}
-              </button>
-            ))}
+          {/* Scientific Toggle Button */}
+          <div className="mb-4">
+            <button
+              onClick={() => setShowScientific(!showScientific)}
+              className="w-full bg-linear-to-b from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 text-white font-bold py-3 px-4 rounded-lg transition-all transform hover:scale-105 shadow-md text-base"
+            >
+              {showScientific ? "Hide Scientific" : "Show Scientific"}
+            </button>
           </div>
+
+          {/* Scientific Functions */}
+          {showScientific && (
+            <div className="grid grid-cols-3 md:grid-cols-6 gap-2 mb-6 bg-amber-800 p-4 rounded-lg border border-yellow-600">
+              {scientificButtons.map((btn) => (
+                <button
+                  key={btn.label}
+                  onClick={btn.onClick}
+                  className="w-full bg-linear-to-b from-yellow-500 to-yellow-600 hover:from-yellow-400 hover:to-yellow-500 text-amber-900 font-bold py-2 px-3 rounded transition-all transform hover:scale-105 shadow-md text-sm"
+                >
+                  {btn.label}
+                </button>
+              ))}
+            </div>
+          )}
 
           {/* Number Pad */}
           <div className="grid grid-cols-4 gap-3">

@@ -9,6 +9,7 @@ function App() {
   const [previousValue, setPreviousValue] = useState(null);
   const [operation, setOperation] = useState(null);
   const [newNumber, setNewNumber] = useState(true);
+  const [showScientific, setShowScientific] = useState(false);
 
   // ✅ Always return NUMBER (never string)
   const calculate = useCallback((prev, current, op) => {
@@ -48,6 +49,12 @@ function App() {
       setDisplay((prevDisplay) => {
         if (prevDisplay === "Error") return String(num);
 
+        // If display ends with operator and space, just append the number
+        if (/\s[+\-×÷]\s$/.test(prevDisplay)) {
+          setNewNumber(false);
+          return prevDisplay + num;
+        }
+
         if (newNumber) {
           setNewNumber(false);
           return String(num);
@@ -58,6 +65,12 @@ function App() {
     },
     [newNumber],
   );
+
+  // ✅ Operator symbol mapping
+  const getOperatorSymbol = (op) => {
+    const symbols = { "+": "+", "-": "−", "*": "×", "/": "÷" };
+    return symbols[op] || op;
+  };
 
   // ✅ Operation handler
   const handleOperation = useCallback(
@@ -78,7 +91,7 @@ function App() {
               return null;
             }
 
-            setDisplay(String(result));
+            setDisplay(`${result} ${getOperatorSymbol(op)} `);
             return result;
           }
 
@@ -87,7 +100,7 @@ function App() {
 
         setOperation(op);
         setNewNumber(true);
-        return prevDisplay;
+        return `${prevDisplay} ${getOperatorSymbol(op)} `;
       });
     },
     [operation, calculate],
@@ -99,11 +112,9 @@ function App() {
       if (prevDisplay === "Error") return prevDisplay;
 
       if (operation && previousValue !== null) {
-        const result = calculate(
-          previousValue,
-          parseFloat(prevDisplay),
-          operation,
-        );
+        const currentValueStr = prevDisplay.split(" ").pop();
+        const currentValue = parseFloat(currentValueStr);
+        const result = calculate(previousValue, currentValue, operation);
 
         setPreviousValue(null);
         setOperation(null);
@@ -129,18 +140,24 @@ function App() {
   // ✅ Toggle sign
   const toggleSign = useCallback(() => {
     setDisplay((prevDisplay) => {
-      const value = parseFloat(prevDisplay);
+      const lastNumber = prevDisplay.split(/[\s+\-×÷]/).pop();
+      const value = parseFloat(lastNumber);
       if (isNaN(value)) return "0";
-      return String(value * -1);
+      
+      const prefix = prevDisplay.substring(0, prevDisplay.length - lastNumber.length);
+      return prefix + String(value * -1);
     });
   }, []);
 
   // ✅ Percentage
   const handlePercentage = useCallback(() => {
     setDisplay((prevDisplay) => {
-      const value = parseFloat(prevDisplay);
+      const lastNumber = prevDisplay.split(/[\s+\-×÷]/).pop();
+      const value = parseFloat(lastNumber);
       if (isNaN(value)) return "0";
-      return String(value / 100);
+      
+      const prefix = prevDisplay.substring(0, prevDisplay.length - lastNumber.length);
+      return prefix + String(value / 100);
     });
   }, []);
 
@@ -155,7 +172,7 @@ function App() {
       const closeCount = (prevDisplay.match(/\)/g) || []).length;
 
       // If more opens than closes, or ends with operator, add open paren
-      if (openCount > closeCount || /[+\-*/(]$/.test(prevDisplay)) {
+      if (openCount > closeCount || /[+\-×÷(\s]$/.test(prevDisplay)) {
         return prevDisplay + "(";
       }
       // Otherwise, add close paren
@@ -166,14 +183,16 @@ function App() {
   // ✅ Scientific operations
   const handleScientificOp = useCallback(
     (op) => {
-      setDisplay((prevDisplay) => {
-        if (prevDisplay === "Error") return prevDisplay;
-
-        const value = parseFloat(prevDisplay);
+      setDispllastNumber = prevDisplay.split(/[\s+\-×÷]/).pop();
+        const value = parseFloat(lastNumber);
         const result = calculate(null, value, op);
 
         setNewNumber(true);
 
+        if (isInvalid(result)) return "Error";
+
+        const prefix = prevDisplay.substring(0, prevDisplay.length - lastNumber.length);
+        return prefix +
         if (isInvalid(result)) return "Error";
 
         return String(result);
@@ -207,6 +226,10 @@ function App() {
       } else if (key === "Backspace") {
         setDisplay((prev) => {
           if (prev === "Error") return "0";
+          if (prev.endsWith(" ")) {
+            // If ends with operator and space, remove operator and space
+            return prev.slice(0, -3).trim() || "0";
+          }
           return prev.length > 1 ? prev.slice(0, -1) : "0";
         });
       } else if (key === "Escape") {
@@ -241,6 +264,8 @@ function App() {
               handlePercentage={handlePercentage}
               handleScientificOp={handleScientificOp}
               handleParenthesis={handleParenthesis}
+              showScientific={showScientific}
+              setShowScientific={setShowScientific}
             />
           }
         />
