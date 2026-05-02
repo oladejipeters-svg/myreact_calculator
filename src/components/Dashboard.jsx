@@ -138,7 +138,7 @@ function Dashboard({
         <div className="bg-linear-to-br from-amber-900 to-amber-800 rounded-2xl shadow-2xl p-8 border-4 border-yellow-600">
           {/* Display */}
           <div className="bg-linear-to-r from-amber-950 to-yellow-900 rounded-lg p-6 mb-6 shadow-inner border-2 border-yellow-700">
-            <p className="text-right text-5xl font-bold text-yellow-300 wrap-break-word drop-shadow-lg font-mono">
+            <p className="calculator-display text-right font-bold text-yellow-300 wrap-break-word drop-shadow-lg font-mono">
               {formatDisplay(display)}
             </p>
           </div>

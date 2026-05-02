@@ -19,6 +19,8 @@ body {
 .calculator-display {
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.05em;
+  font-size: clamp(2.2rem, 6vw, 3.5rem);
+  line-height: 1.05;
 }
 
 /* Button ripple effect */
