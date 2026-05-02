@@ -120,6 +120,17 @@ function Dashboard({
     { label: "x^y", onClick: () => handleOperation("pow") },
   ];
 
+  const formatDisplay = (value) => {
+    if (value === "" || value === "Error") return value;
+
+    const match = value.match(/^(-?)(\d+)(\.\d*)?$/);
+    if (!match) return value;
+
+    const [, sign, integerPart, decimalPart = ""] = match;
+    const groupedInteger = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    return `${sign}${groupedInteger}${decimalPart}`;
+  };
+
   return (
     <div className="min-h-screen bg-linear-to-br from-yellow-50 via-amber-50 to-amber-100 py-8 px-4">
       <div className="max-w-2xl mx-auto">
@@ -128,7 +139,7 @@ function Dashboard({
           {/* Display */}
           <div className="bg-linear-to-r from-amber-950 to-yellow-900 rounded-lg p-6 mb-6 shadow-inner border-2 border-yellow-700">
             <p className="text-right text-5xl font-bold text-yellow-300 wrap-break-word drop-shadow-lg font-mono">
-              {display}
+              {formatDisplay(display)}
             </p>
           </div>
 
