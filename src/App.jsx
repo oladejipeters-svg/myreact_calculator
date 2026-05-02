@@ -143,8 +143,11 @@ function App() {
       const lastNumber = prevDisplay.split(/[\s+\-×÷]/).pop();
       const value = parseFloat(lastNumber);
       if (isNaN(value)) return "0";
-      
-      const prefix = prevDisplay.substring(0, prevDisplay.length - lastNumber.length);
+
+      const prefix = prevDisplay.substring(
+        0,
+        prevDisplay.length - lastNumber.length,
+      );
       return prefix + String(value * -1);
     });
   }, []);
@@ -155,8 +158,11 @@ function App() {
       const lastNumber = prevDisplay.split(/[\s+\-×÷]/).pop();
       const value = parseFloat(lastNumber);
       if (isNaN(value)) return "0";
-      
-      const prefix = prevDisplay.substring(0, prevDisplay.length - lastNumber.length);
+
+      const prefix = prevDisplay.substring(
+        0,
+        prevDisplay.length - lastNumber.length,
+      );
       return prefix + String(value / 100);
     });
   }, []);
@@ -183,7 +189,10 @@ function App() {
   // ✅ Scientific operations
   const handleScientificOp = useCallback(
     (op) => {
-      setDispllastNumber = prevDisplay.split(/[\s+\-×÷]/).pop();
+      setDisplay((prevDisplay) => {
+        if (prevDisplay === "Error") return prevDisplay;
+
+        const lastNumber = prevDisplay.split(/[\s+\-×÷]/).pop();
         const value = parseFloat(lastNumber);
         const result = calculate(null, value, op);
 
@@ -191,11 +200,11 @@ function App() {
 
         if (isInvalid(result)) return "Error";
 
-        const prefix = prevDisplay.substring(0, prevDisplay.length - lastNumber.length);
-        return prefix +
-        if (isInvalid(result)) return "Error";
-
-        return String(result);
+        const prefix = prevDisplay.substring(
+          0,
+          prevDisplay.length - lastNumber.length,
+        );
+        return prefix + String(result);
       });
     },
     [calculate],
